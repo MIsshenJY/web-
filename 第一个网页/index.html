@@ -65,7 +65,24 @@
                 background: url('image/background.jpg') center/cover no-repeat;
                 opacity: 0.35;
             }
-        </style>
+        </style>       
+        <script>
+            // 欢迎弹窗
+            window.onload = function() {
+                setTimeout(function() {
+                    alert('欢迎来到我的个人主页！');
+                }, 600);
+            };
+
+            // 动态时间显示
+            function updateTime() {
+                var now = new Date();
+                var timeStr = now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日 ' + now.toLocaleTimeString();
+                var timeDiv = document.getElementById('current-time');
+    if (timeDiv) timeDiv.textContent = '当前时间：' + timeStr;
+            }
+            setInterval(updateTime, 1000);
+        </script>
     </head>
 
     <body>
@@ -79,6 +96,7 @@
             <img src="image/pic.png" alt="乱七八糟">
             <h2>联系我</h2>
             <p>电子邮箱：<a class="contact" href="mailto:3044469455@qq.com">3044469455@qq.com</a></p>
+            <div id="current-time" style="margin-top:18px;color:#1976d2;font-size:0.98em;"></div>
         </div>
         <div class="side-img left">
             <img src="image/left.png" alt="吉伊">
