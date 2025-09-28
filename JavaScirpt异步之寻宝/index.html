@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>寻宝 - 异步动画演示</title>
+    <style>
+        /*全局样式重置*/
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /*主体样式--背景设置*/
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f4e4bc 0%, #d4a574 50%, #b8860b 100%);
+            min-height: 100vh;
+            color: #5d4e37;
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #8b4513;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(139, 69, 19, 0.3);
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1em;
+            opacity: 0.8;
+        }
+
+        .game-area {
+            background: rgba(255, 248, 220, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.15);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #daa520;
+        }
+
+        .story-section {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+
+        .story-text {
+            font-size: 1.1em;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #fff8dc;
+            border-radius: 8px;
+            border-left: 4px solid #daa520;
+            min-height: 100px;
+            box-shadow: inset 0 1px 3px rgba(139, 69, 19, 0.1);
+        }
+
+        .progress-section {
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #f5deb3;
+            border-radius: 3px;
+            overflow: hidden;
+            border: 1px solid #daa520;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #daa520, #b8860b);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .status-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #fff8dc;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #daa520;
+        }
+
+        .status-item {
+            text-align: center;
+        }
+
+        .status-label {
+            font-size: 0.85em;
+            color: #8b4513;
+            margin-bottom: 3px;
+        }
+
+        .status-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #5d4e37;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .start-btn {
+            background: #228b22;
+            color: white;
+        }
+
+        .restart-btn {
+            background: #cd853f;
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 15px;
+            color: #8b4513;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 2px solid #f5deb3;
+            border-top: 2px solid #daa520;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 220px;
+            background: #f5deb3;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 12px 0;
+            color: #8b4513;
+            font-style: italic;
+            border: 2px dashed #daa520;
+            font-size: 0.9em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /*图片自适应样式 */
+        .image-placeholder img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: cover;
+            display: block;
+            border-radius: 6px;
+        }
+
+        .image-caption {
+            position: absolute;
+            left: 12px;
+            bottom: 8px;
+            background: rgba(255,255,255,0.85);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #8b4513;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .status-section {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .image-placeholder { height: 160px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 游戏主容器 -->
+    <div class="game-container">
+        <!-- 页面头部 -->
+        <div class="header">
+            <h1>🏜️ 寻宝探险</h1>
+            <p>跟随线索穿越沙漠，体验冒险之旅！</p>
+        </div>
+
+        <!-- 游戏主区域 -->
+        <div class="game-area">
+            <!-- 进度条区域 -->
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- 步骤指示器 - 6个圆点显示当前进度 -->
+            <div class="step-indicator">
+                <div class="step-dot" id="step1"></div>
+                <div class="step-dot" id="step2"></div>
+                <div class="step-dot" id="step3"></div>
+                <div class="step-dot" id="step4"></div>
+                <div class="step-dot" id="step5"></div>
+                <div class="step-dot" id="step6"></div>
+            </div>
+
+            <!-- 状态信息栏 -->
+            <div class="status-section">
+                <div class="status-item">
+                    <div class="status-label">当前阶段</div>
+                    <div class="status-value" id="currentStage">准备中</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">探险进度</div>
+                    <div class="status-value" id="progress">0%</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">状态</div>
+                    <div class="status-value" id="status">待开始</div>
+                </div>
+            </div>
+
+            <!-- 故事内容区域 -->
+            <div class="story-section">
+                <!-- 故事文本显示区域 -->
+                <div class="story-text" id="storyText">
+                    欢迎来到寻宝探险！<br><br>
+                    你将扮演一位勇敢的探险家，根据古老的线索穿越沙漠寻找传说中的宝藏。
+                    每一步都需要耐心等待，因为这是异步编程。<br><br>
+                    好了现在请点击"开始探险"开始你的寻宝之旅！
+                </div>
+
+                <!-- 图片展示区域 -->
+                <div class="image-placeholder" id="imagePlaceholder">
+                    <img id="stepImage" src="./image/placeholder.jpg" alt="默认图片" />
+                    <div id="imageCaption" class="image-caption">说明</div>
+                </div>
+
+                <!-- 加载动画 -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <div>正在处理你的选择...</div>
+                </div>
+            </div>
+
+            <!-- 控制按钮区域 -->
+            <div class="controls">
+                <button class="control-btn start-btn" id="startBtn">开始探险</button>
+                <button class="control-btn restart-btn" id="restartBtn" style="display: none;">重新开始</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 代码区域 -->
+    <script>
+        // TreasureMap 类定义
+        // 模拟宝藏地图API，提供异步寻宝功能（来自 rewrite2.0.js）
+        class TreasureMap {
+            // 获取初始线索 - 1秒后返回结果
+            static getInitialClue() {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve("在古老的图书馆里找到了第一个线索...");
+                }, 1000);
+              });
+            }
+          
+            // 解码古文字 - 1.5秒后返回结果，如果没有线索则失败
+            static decodeAncientScript(clue) {
+              return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                  if (!clue) {
+                    reject("没有线索可以解码!");
+                  }
+                  resolve("解码成功!宝藏在一座古老的神庙中...");
+                }, 1500);
+              });
+            }
+
+            // 获取下一步方向 - 1.2秒后返回，50%概率有方向
+            static nextStep() {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  const random = Math.random();
+                    if (random < 0.5) {
+                      // 有提示：返回方向（非 null）和要打印的信息
+                      resolve({ direction: '向东南方前进3公里', message: '线索中隐藏了一个方向...' });
+                    } else {
+                      // 无提示：direction 为 null，但仍返回要打印的信息
+                      resolve({ direction: null, message: '埋头继续向前走...' });
+                    }
+                }, 1200);
+              });
+            }
+
+            // 穿越沙漠 - 2秒后返回结果，如果没有方向则失败
+            static traverseDesert(direction) {
+              return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                  if (!direction) {
+                    reject("没有方向，迷失在沙漠!");
+                  }
+                  resolve(`找到了方向:${direction}，成功穿越沙漠，看到了神庙的轮廓!`);
+                }, 2000);
+              });
+            }
+
+            // 神庙探索 - 2秒后返回结果，50%概率遇到守卫失败
+            static searchTemple(location) {
+              return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                  const random = Math.random();
+                  if (random < 0.5) {
+                    reject("糟糕!遇到了神庙守卫!");
+                  }
+                  resolve("找到了一个神秘的箱子...");
+                }, 2000);
+              });
+            }
+
+            // 打开宝箱 - 1秒后返回成功结果
+            static openTreasureBox() {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve("恭喜!你找到了传说中的宝藏!");
+                }, 1000);
+              });
+            }
+        }
+
+        // 页面控制器（简洁版），使用现有 DOM 元素
+        (function () {
+            const startBtn = document.getElementById('startBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            const storyText = document.getElementById('storyText');
+            const imagePlaceholder = document.getElementById('imagePlaceholder');
+            const stepImage = document.getElementById('stepImage');
+            const imageCaption = document.getElementById('imageCaption');
+            const loading = document.getElementById('loading');
+            const progressFill = document.getElementById('progressFill');
+            const progressLabel = document.getElementById('progress');
+            const statusLabel = document.getElementById('status');
+            const currentStage = document.getElementById('currentStage');
+
+            const totalSteps = 6;
+            // 把图片路径和说明加入到元信息
+            const stepsMeta = [
+                { title: "获取初始线索", image: "./image/step1.jpg", alt: "古老图书馆" },
+                { title: "解码古文字", image: "./image/step2.jpg", alt: "解读古文字" },
+                { title: "发现方向", image: "./image/step3.jpg", alt: "发现方向" },
+                { title: "穿越沙漠", image: "./image/step4.jpg", alt: "穿越沙漠" },
+                { title: "神庙探索", image: "./image/step5.jpg", alt: "神庙入口" },
+                { title: "获得宝藏", image: "./image/step6.jpg", alt: "闪亮宝藏" }
+            ];
+
+            let lastClue = null;
+            let lastDirection = null;
+            let isRunning = false;
+
+            /*工具函数 */
+            
+            // 显示/隐藏加载动画
+            function setLoading(show) {
+                if (show) loading.classList.add('show');
+                else loading.classList.remove('show');
+            }
+
+            // 更新进度条和步骤指示器
+            function updateProgress(stepIndex) {
+                const progress = Math.round(((stepIndex + 1) / totalSteps) * 100);
+                progressFill.style.width = progress + '%';
+                progressLabel.textContent = progress + '%';
+                
+                // 更新步骤指示器圆点状态
+                for (let i = 1; i <= totalSteps; i++) {
+                    const dot = document.getElementById(`step${i}`);
+                    if (!dot) continue;
+                    dot.classList.remove('active','completed');
+                    if (i - 1 < stepIndex) dot.classList.add('completed');  // 已完成的步骤
+                    else if (i - 1 === stepIndex) dot.classList.add('active');  // 当前步骤
+                }
+            }
+
+            // 添加结果消息到故事文本区域
+            function appendResultMessage(msg, isError = false) {
+                // 接受已经格式化的字符串
+                const div = document.createElement('div');
+                div.className = isError ? 'error-message' : 'success-message';
+                div.style.marginTop = '10px';
+                div.textContent = msg;
+                storyText.appendChild(div);
+                storyText.scrollTop = storyText.scrollHeight;
+            }
+
+            // 把异步返回值格式化为可读字符串
+            function formatResult(res) {
+                if (res === null || res === undefined) return String(res);
+                if (typeof res === 'object') {
+                    // 常见的 { direction, message } 格式优先展示 message 和 direction
+                    if ('message' in res || 'direction' in res) {
+                        const msg = res.message ? String(res.message) : '';
+                        const dir = res.direction ? String(res.direction) : '';
+                        return dir ? (msg + '（方向：' + dir + '）') : msg || JSON.stringify(res);
+                    }
+                    // 其他对象使用 JSON 字符串
+                    try {
+                        return JSON.stringify(res);
+                    } catch (e) {
+                        return String(res);
+                    }
+                }
+                return String(res);
+            }
+
+            // 预加载图片
+            function preloadImages(list) {
+                list.forEach(src => {
+                    const img = new Image();
+                    img.src = src;
+                });
+            }
+
+            async function executeStep(index, fn) {
+                currentStage.textContent = stepsMeta[index].title;
+                statusLabel.textContent = '进行中';
+                // 显示对应图片与说明
+                if (stepImage && stepsMeta[index].image) {
+                    stepImage.src = stepsMeta[index].image;
+                    stepImage.alt = stepsMeta[index].alt || stepsMeta[index].title;
+                }
+                if (imageCaption) imageCaption.textContent = stepsMeta[index].alt || stepsMeta[index].title;
+                setLoading(true);
+                updateProgress(index);
+
+                try {
+                    const res = await fn();
+                    appendResultMessage(formatResult(res));
+                    await new Promise(r => setTimeout(r, 900));
+                    return res;
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            /* 主要游戏逻辑 */
+            
+            // 运行寻宝游戏主流程
+            async function runTreasureHunt() {
+                isRunning = true;
+                startBtn.style.display = 'none';
+                restartBtn.style.display = 'inline-block';
+                storyText.innerHTML = ''; // 清空历史消息
+                statusLabel.textContent = '进行中';
+
+                try {
+                    // step 0
+                    lastClue = await executeStep(0, () => TreasureMap.getInitialClue());
+
+                    // step 1
+                    const decoded = await executeStep(1, () => TreasureMap.decodeAncientScript(lastClue));
+
+                    // step 2
+                    const next = await executeStep(2, () => TreasureMap.nextStep());
+                    lastDirection = next && next.direction ? next.direction : null;
+
+                    // step 3
+                    const traversed = await executeStep(3, () => TreasureMap.traverseDesert(lastDirection));
+
+                    // step 4
+                    const box = await executeStep(4, () => TreasureMap.searchTemple(traversed));
+
+                    // step 5
+                    const treasure = await executeStep(5, () => TreasureMap.openTreasureBox());
+
+                    // 成功展示
+                    statusLabel.textContent = '探险完成';
+                    currentStage.textContent = '完成';
+                    if (stepImage) {
+                        stepImage.src = './image/success.jpg';
+                        stepImage.alt = '探险成功';
+                    }
+                    if (imageCaption) imageCaption.textContent = '探险成功';
+                    appendResultMessage('🎉 探险成功，获得宝藏！');
+                } catch (err) {
+                    // 统一错误处理
+                    statusLabel.textContent = '探险失败';
+                    const msg = err && err.toString ? err.toString() : String(err);
+                    appendResultMessage('错误：' + msg, true);
+                    if (stepImage) {
+                        stepImage.src = './image/fail.jpg';
+                        stepImage.alt = '探险失败';
+                    }
+                    if (imageCaption) imageCaption.textContent = '探险失败';
+                } finally {
+                    isRunning = false;
+                }
+            }
+
+            function resetUI() {
+                lastClue = null;
+                lastDirection = null;
+                storyText.innerHTML = `欢迎来到寻宝探险！<br><br>点击“开始探险”体验异步寻宝流程。`;
+                progressFill.style.width = '0%';
+                progressLabel.textContent = '0%';
+                currentStage.textContent = '准备中';
+                statusLabel.textContent = '待开始';
+                for (let i = 1; i <= totalSteps; i++) {
+                    const dot = document.getElementById(`step${i}`);
+                    if (dot) dot.classList.remove('active','completed');
+                }
+                startBtn.style.display = 'inline-block';
+                restartBtn.style.display = 'none';
+                setLoading(false);
+                // 恢复默认占位图与说明
+                if (stepImage) stepImage.src = './image/placeholder.jpg';
+                if (imageCaption) imageCaption.textContent = '🏜️ 准备出发';
+                // 预加载所有步骤图与结果图（可注释掉避免 404）
+                preloadImages(stepsMeta.map(s => s.image).concat(['./image/placeholder.jpg']));
+            }
+
+            /* 事件绑定 */
+            
+            // 绑定开始按钮点击事件
+            startBtn.addEventListener('click', () => {
+                if (!isRunning) runTreasureHunt();
+            });
+            
+            // 绑定重新开始按钮点击事件
+            restartBtn.addEventListener('click', () => {
+                if (isRunning) return;
+                resetUI();
+            });
+
+            // 页面初始
+            resetUI();
+        })();
+    </script>
+</body>
+</html>
