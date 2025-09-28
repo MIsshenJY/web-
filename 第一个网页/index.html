@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <html>
     <head>
         <title>个人网站</title>
@@ -107,4 +108,115 @@
         <div class="footer-bg"></div>
     </body>
 
+=======
+<html>
+    <head>
+        <title>个人网站</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                min-height: 100vh;
+            }
+            .container {
+                max-width: 640px;
+                height: auto;
+                margin: 60px auto 120px auto;
+                background: #fff;
+                box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+                padding: 40px 28px 32px 28px;
+            }
+            .avatar {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-bottom: 16px;
+                border: 2px solid #90caf9;
+            }
+            h1 {
+                margin: 0 0 12px 0;
+                font-size: 24px;
+                color: #000000;
+            }
+            h2 {
+                margin: 24px 0 12px 0;
+                font-size: 20px;
+                color: #000000;
+            }
+            p {
+                color: #000000;
+                font-size: 16px;
+                margin-bottom: 18px;
+            }
+            .contact {
+                color: #0288d1;
+                font-size: 16px;
+            }
+            .side-img {
+                position: fixed;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 0; 
+            }
+            .left {
+                left: 20px;
+            }
+            .right {
+                right: 20px;
+            }
+            .footer-bg {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100vw;
+                height: 100vw;
+                z-index: -1;
+                background: url('image/background.jpg') center/cover no-repeat;
+                opacity: 0.35;
+            }
+        </style>       
+        <script>
+            // 欢迎弹窗
+            window.onload = function() {
+                setTimeout(function() {
+                    alert('欢迎来到我的个人主页！');
+                }, 600);
+            };
+
+            // 动态时间显示
+            function updateTime() {
+                var now = new Date();
+                var timeStr = now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日 ' + now.toLocaleTimeString();
+                var timeDiv = document.getElementById('current-time');
+    if (timeDiv) timeDiv.textContent = '当前时间：' + timeStr;
+            }
+            setInterval(updateTime, 1000);
+        </script>
+    </head>
+
+    <body>
+        <div class="container">
+            <img class="avatar" src="image/avatar.jpg" alt="头像">
+            <h1>Me</h1>
+            <p>你好，欢迎来到我的个人主页！</p>
+            <h2>我的介绍</h2>
+            <p>我是谌洁雅，来自湖南，是南华大学计算机学院数据2304班的一名学生。</p>
+            <p>我喜欢绘画、阅读等，喜欢探索新事物，和不同的人分享不同的经历和看法。</p>
+            <img src="image/pic.png" alt="乱七八糟">
+            <h2>联系我</h2>
+            <p>电子邮箱：<a class="contact" href="mailto:3044469455@qq.com">3044469455@qq.com</a></p>
+            <div id="current-time" style="margin-top:18px;color:#1976d2;font-size:0.98em;"></div>
+        </div>
+        <div class="side-img left">
+            <img src="image/left.png" alt="吉伊">
+        </div>
+        <div class="side-img right">
+            <img src="image/right.png" alt="小八">
+        </div>
+        <div class="footer-bg"></div>
+    </body>
+
+>>>>>>> 8792f3a79d2b6128d3065c8221c5b7b57b712ad7
 </html>
