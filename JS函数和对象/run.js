@@ -1,4 +1,3 @@
-// run.js
 // 在 Node.js 下演示并验证三种堆栈实现的用法，包含边界测试
 
 const { createClosureStack } = require('./closureStack');

@@ -1,9 +1,4 @@
-// closureStack.js
 // 堆栈 — 闭包实现 (factory + closure)
-// 说明：该实现把内部数据完全封装在闭包中，外部不可直接访问。
-// 学习笔记：闭包提供了最强的私有性，但每次创建实例都会分配一套方法，
-// 对大量实例来说可能有内存开销。
-// 复杂度：push/pop/peek/isEmpty/size 为 O(1)。toArray 为 O(n)。
 
 function createClosureStack() {
   const items = [];
@@ -26,10 +21,12 @@ function createClosureStack() {
       return items[items.length - 1];
     },
 
+    // 栈是否为空
     isEmpty() {
       return items.length === 0;
     },
 
+    // 返回栈的元素数量
     size() {
       return items.length;
     },
