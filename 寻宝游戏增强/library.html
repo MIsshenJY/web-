@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古老图书馆 - 沙漠寻宝冒险</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: '微软雅黑', Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #1a1a1a;
+        }
+        
+        .scene-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #2c1e1e 0%, #1a1a1a 100%);
+            overflow: hidden;
+        }
+        
+        /* 图书馆背景元素 */
+        .library-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 50% 50%, #3a2a2a 0%, transparent 70%);
+        }
+        
+        .bookshelf {
+            position: absolute;
+            background-color: #5a3921;
+            border: 5px solid #3a2212;
+        }
+        
+        .bookshelf-left {
+            left: 10%;
+            top: 20%;
+            width: 200px;
+            height: 60%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        
+        .bookshelf-right {
+            right: 10%;
+            top: 20%;
+            width: 200px;
+            height: 60%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        
+        .shelf {
+            height: 30px;
+            background-color: #3a2212;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .shelf::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -5px;
+            height: 5px;
+            background-color: #2a1a10;
+        }
+        
+        .book {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            background-color: #8b4513;
+            border-radius: 2px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .book:nth-child(odd) {
+            background-color: #a0522d;
+        }
+        
+        .book:nth-child(3n) {
+            background-color: #cd853f;
+        }
+        
+        /* 中央桌子 */
+        .table {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 200px;
+            background-color: #8b4513;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .table::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            background-color: #deb887;
+            border-radius: 8px;
+        }
+        
+        /* 古地图元素 */
+        .ancient-map {
+            position: absolute;
+            width: 300px;
+            height: 150px;
+            background-color: #f5deb3;
+            border: 5px solid #8b4513;
+            border-radius: 5px;
+            padding: 15px;
+            font-size: 16px;
+            color: #8b4513;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            transform-origin: center;
+        }
+        
+        .ancient-map:hover {
+            transform: scale(1.05) rotate(1deg);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .ancient-map::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(#8b4513 1px, transparent 1px),
+                radial-gradient(#8b4513 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        /* 线索显示区域 */
+        .clue-container {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            font-size: 18px;
+            color: #5a3921;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .clue-text {
+            line-height: 1.6;
+        }
+        
+        /* 返回按钮 */
+        .return-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #8b4513;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .return-button:hover {
+            background-color: #a0522d;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 闪烁动画 */
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5); }
+        }
+        
+        .glowing {
+            animation: glow 2s infinite;
+        }
+        
+        /* 文本打字效果 */
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        .typing-effect {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 3s steps(40, end);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .bookshelf-left,
+            .bookshelf-right {
+                width: 150px;
+            }
+            
+            .table {
+                width: 300px;
+                height: 150px;
+            }
+            
+            .ancient-map {
+                width: 250px;
+                height: 120px;
+                font-size: 14px;
+            }
+            
+            .clue-container {
+                font-size: 16px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scene-container">
+        <!-- 图书馆背景 -->
+        <div class="library-background"></div>
+        
+        <!-- 书架 -->
+        <div class="bookshelf bookshelf-left">
+            <div class="shelf"></div>
+            <div class="shelf"></div>
+            <div class="shelf"></div>
+            <div class="shelf"></div>
+        </div>
+        
+        <div class="bookshelf bookshelf-right">
+            <div class="shelf"></div>
+            <div class="shelf"></div>
+            <div class="shelf"></div>
+            <div class="shelf"></div>
+        </div>
+        
+        <!-- 中央桌子 -->
+        <div class="table">
+            <div class="ancient-map glowing" id="ancientMap">
+                古老的地图<br>
+                点击我获取线索
+            </div>
+        </div>
+        
+        <!-- 线索显示 -->
+        <div class="clue-container" id="clueContainer">
+            <p class="clue-text" id="clueText">欢迎来到古老图书馆，这里隐藏着寻宝的第一个线索...</p>
+        </div>
+        
+        <!-- 返回按钮 -->
+        <button class="return-button" id="returnButton">返回全景</button>
+    </div>
+    
+    <script src="treasurePRO.js"></script>
+    <script>
+        // 初始化游戏状态
+        const gameState = new GameState();
+        gameState.load();
+        
+        // 获取DOM元素
+        const ancientMap = document.getElementById('ancientMap');
+        const clueText = document.getElementById('clueText');
+        const returnButton = document.getElementById('returnButton');
+        
+        // 生成书架上的书籍
+        function generateBooks() {
+            const shelves = document.querySelectorAll('.shelf');
+            shelves.forEach(shelf => {
+                const bookCount = Math.floor(Math.random() * 8) + 12;
+                for (let i = 0; i < bookCount; i++) {
+                    const book = document.createElement('div');
+                    book.className = 'book';
+                    book.style.left = `${i * 8}px`;
+                    book.style.height = `${Math.floor(Math.random() * 40) + 60}px`;
+                    book.style.width = `${Math.floor(Math.random() * 5) + 15}px`;
+                    shelf.appendChild(book);
+                }
+            });
+        }
+        
+        // 显示线索
+        async function revealClue() {
+            try {
+                clueText.textContent = '正在寻找线索...';
+                
+                // 使用TreasureMap类获取初始线索
+                const clue = await TreasureMap.getInitialClue();
+                
+                // 添加打字效果
+                clueText.textContent = '';
+                clueText.classList.add('typing-effect');
+                clueText.textContent = clue;
+                
+                // 延迟后显示解码后的线索
+                setTimeout(async () => {
+                    const decodedMessage = await TreasureMap.decodeAncientScript(clue);
+                    clueText.classList.remove('typing-effect');
+                    clueText.textContent = decodedMessage;
+                    
+                    // 更新游戏状态 - 获得古地图
+                    gameState.hasAncientMap = true;
+                    gameState.save();
+                    
+                    // 更改地图显示
+                    ancientMap.textContent = '✓ 已获取古地图\n现在前往神秘路标';
+                    ancientMap.classList.remove('glowing');
+                    ancientMap.style.backgroundColor = '#90EE90';
+                    
+                    // 显示提示
+                    showToast('你获得了古地图！现在可以前往沙漠路标。');
+                }, 3500);
+            } catch (error) {
+                console.error('获取线索失败:', error);
+                clueText.textContent = '获取线索失败，请重试。';
+            }
+        }
+        
+        // 事件监听器
+        ancientMap.addEventListener('click', revealClue);
+        
+        returnButton.addEventListener('click', () => {
+            gameState.save();
+            window.location.href = 'index.html';
+        });
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', () => {
+            generateBooks();
+            
+            // 如果已经获取了地图，更新显示
+            if (gameState.hasAncientMap) {
+                ancientMap.textContent = '已获取古地图 - 可前往沙漠路标';
+                ancientMap.classList.remove('glowing');
+                ancientMap.style.backgroundColor = '#90EE90';
+                clueText.textContent = '解码完成：地图提示先去路标确认方向，再沿古道前往神庙。';
+            }
+            
+            // 初始化页面通用交互（返回按钮等）
+            gameState.setupNavigation();
+            
+            // 播放背景音乐
+            gameState.playBackgroundMusic('library');
+        });
+    </script>
+</body>
+</html>

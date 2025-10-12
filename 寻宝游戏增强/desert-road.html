@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沙漠之路 - 沙漠寻宝冒险</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: '微软雅黑', Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #f5deb3;
+        }
+        
+        .scene-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #f5deb3 0%, #d2b48c 50%, #a0522d 100%);
+            overflow: hidden;
+        }
+        
+        /* 沙漠背景元素 */
+        .desert-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .sand-dune {
+            position: absolute;
+            background-color: #d2b48c;
+            border-radius: 50%;
+        }
+        
+        .sand-dune {
+            position: absolute;
+            background-color: #d2b48c;
+            border-radius: 50%;
+        }
+        
+        /* 远处的沙丘 */
+        .distant-dune {
+            opacity: 0.7;
+            transform: scale(1.2);
+        }
+        
+        .dune-1 {
+            width: 600px;
+            height: 300px;
+            bottom: -100px;
+            left: -200px;
+        }
+        
+        .dune-2 {
+            width: 800px;
+            height: 400px;
+            bottom: -150px;
+            right: -300px;
+        }
+        
+        .dune-3 {
+            width: 500px;
+            height: 250px;
+            bottom: -100px;
+            left: 50%;
+        }
+        
+        .dune-4 {
+            width: 400px;
+            height: 200px;
+            bottom: 100px;
+            right: 30%;
+            opacity: 0.8;
+        }
+        
+        /* 沙尘暴效果 */
+        .sandstorm {
+            position: absolute;
+            width: 300px;
+            height: 200px;
+            background: rgba(210, 180, 140, 0.3);
+            border-radius: 50%;
+            filter: blur(20px);
+            animation: sandstormMove 20s linear infinite;
+            opacity: 0.7;
+        }
+        
+        .sandstorm-1 {
+            top: 30%;
+            left: -300px;
+            animation-duration: 30s;
+        }
+        
+        .sandstorm-2 {
+            top: 50%;
+            left: -300px;
+            animation-duration: 40s;
+            animation-delay: 10s;
+        }
+        
+        @keyframes sandstormMove {
+            0% { transform: translateX(-300px); }
+            100% { transform: translateX(150vw); }
+        }
+        
+        /* 太阳 */
+        .sun {
+            position: absolute;
+            top: 100px;
+            right: 100px;
+            width: 100px;
+            height: 100px;
+            background-color: #ffd700;
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.8);
+            animation: sunGlow 5s ease-in-out infinite;
+        }
+        
+        @keyframes sunGlow {
+            0%, 100% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.8); }
+            50% { box-shadow: 0 0 80px rgba(255, 215, 0, 1); }
+        }
+        
+        /* 探险者 */
+        .explorer {
+            position: absolute;
+            bottom: 15%;
+            left: 10%;
+            width: 60px;
+            height: 120px;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+        
+        .explorer-body {
+            position: absolute;
+            width: 30px;
+            height: 80px;
+            background-color: #8b4513;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+        }
+        
+        .explorer-head {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #f0c090;
+            border-radius: 50%;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            border: 2px solid #8b4513;
+        }
+        
+        .explorer-arm {
+            position: absolute;
+            width: 15px;
+            height: 60px;
+            background-color: #f0c090;
+            left: 50%;
+            top: 20px;
+            transform: translateX(-50%) rotate(-30deg);
+            transform-origin: bottom center;
+        }
+        
+        .explorer-arm.right {
+            transform: translateX(-50%) rotate(30deg);
+        }
+        
+        .explorer-legs {
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .explorer-leg {
+            position: absolute;
+            width: 15px;
+            height: 60px;
+            background-color: #8b4513;
+            bottom: 0;
+        }
+        
+        .explorer-leg.left {
+            left: 0;
+        }
+        
+        .explorer-leg.right {
+            right: 0;
+        }
+        
+        /* 移动动画 */
+        @keyframes walk {
+            0%, 100% { 
+                transform: translate(0, 0);
+                .explorer-leg.left { transform: rotate(0deg); }
+                .explorer-leg.right { transform: rotate(0deg); }
+            }
+            25% { 
+                transform: translate(10px, -5px);
+                .explorer-leg.left { transform: rotate(-30deg); }
+                .explorer-leg.right { transform: rotate(30deg); }
+            }
+            75% { 
+                transform: translate(10px, -5px);
+                .explorer-leg.left { transform: rotate(30deg); }
+                .explorer-leg.right { transform: rotate(-30deg); }
+            }
+        }
+        
+        .walking {
+            animation: walk 1s ease-in-out infinite;
+        }
+        
+        /* 进度条 */
+        .progress-container {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-bar {
+            width: 0%;
+            height: 30px;
+            background: linear-gradient(to right, #ffd700, #ff9800);
+            border-radius: 15px;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #8b4513;
+            font-weight: bold;
+            font-size: 16px;
+            z-index: 1;
+        }
+        
+        /* 线索显示区域 */
+        .clue-container {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            font-size: 18px;
+            color: #5a3921;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .clue-text {
+            line-height: 1.6;
+        }
+        
+        /* 开始穿越按钮 */
+        .start-button {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #8b4513;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 20;
+        }
+        
+        .start-button:hover {
+            background-color: #a0522d;
+            transform: translate(-50%, -2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .start-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: translateX(-50%);
+        }
+        
+        /* 返回按钮 */
+        .return-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #8b4513;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .return-button:hover {
+            background-color: #a0522d;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .explorer {
+                width: 50px;
+                height: 100px;
+            }
+            
+            .sun {
+                width: 80px;
+                height: 80px;
+                top: 80px;
+                right: 50px;
+            }
+            
+            .clue-container {
+                font-size: 16px;
+                padding: 15px;
+            }
+            
+            .start-button {
+                font-size: 16px;
+                padding: 12px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scene-container">
+        <!-- 沙漠背景 -->
+        <div class="desert-background">
+            <div class="sand-dune dune-1 distant-dune"></div>
+            <div class="sand-dune dune-2 distant-dune"></div>
+            <div class="sand-dune dune-3"></div>
+            <div class="sand-dune dune-4"></div>
+            <div class="sandstorm sandstorm-1"></div>
+            <div class="sandstorm sandstorm-2"></div>
+        </div>
+        
+        <!-- 太阳 -->
+        <div class="sun"></div>
+        
+        <!-- 探险者 -->
+        <div class="explorer" id="explorer">
+            <div class="explorer-head"></div>
+            <div class="explorer-body"></div>
+            <div class="explorer-arm left"></div>
+            <div class="explorer-arm right"></div>
+            <div class="explorer-legs">
+                <div class="explorer-leg left"></div>
+                <div class="explorer-leg right"></div>
+            </div>
+        </div>
+        
+        <!-- 线索显示 -->
+        <div class="clue-container" id="clueContainer">
+            <p class="clue-text" id="clueText">广阔的沙漠延伸至远方，你需要正确的方向才能穿越...</p>
+        </div>
+        
+        <!-- 进度条 -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
+            <div class="progress-text" id="progressText">穿越进度: 0%</div>
+        </div>
+        
+        <!-- 开始穿越按钮 -->
+        <button class="start-button" id="startButton">开始穿越沙漠</button>
+        
+        <!-- 返回按钮 -->
+        <button class="return-button" id="returnButton">返回地图</button>
+    </div>
+    
+    <script src="treasurePRO.js"></script>
+    <script>
+        // 初始化游戏状态
+        const gameState = new GameState();
+        gameState.load();
+        
+        // 获取DOM元素
+        const explorer = document.getElementById('explorer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const clueText = document.getElementById('clueText');
+        const startButton = document.getElementById('startButton');
+        const returnButton = document.getElementById('returnButton');
+        const progressContainer = document.getElementById('progressContainer');
+        
+        // 隐藏进度条初始状态
+        progressContainer.style.display = 'none';
+        
+        // 检查是否有方向
+        function checkDirection() {
+            if (!gameState.hasDirection) {
+                clueText.textContent = '你需要先从沙漠路标获取正确的方向才能穿越沙漠！';
+                startButton.disabled = true;
+                return false;
+            }
+            startButton.disabled = false;
+            return true;
+        }
+        
+        // 开始穿越沙漠
+        async function startDesertTraversal() {
+            if (!checkDirection()) return;
+            
+            try {
+                // 显示进度条
+                progressContainer.style.display = 'block';
+                
+                // 添加走路动画
+                explorer.classList.add('walking');
+                
+                // 更新线索文本
+                clueText.textContent = '你开始穿越沙漠...';
+                
+                // 禁用按钮
+                startButton.disabled = true;
+                
+                // 模拟进度更新
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 2;
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `穿越进度: ${progress}%`;
+                    
+                    // 移动探险者
+                    explorer.style.left = `${10 + (progress / 100) * 70}%`;
+                    
+                    // 随机显示一些提示
+                    if (progress === 25) {
+                        clueText.textContent = '沙漠中炎热难耐，但你坚持前进...';
+                    } else if (progress === 50) {
+                        clueText.textContent = '你发现了一些古代旅行者的痕迹...';
+                    } else if (progress === 75) {
+                        clueText.textContent = '远处似乎出现了一些建筑物的轮廓！';
+                    }
+                }, 100);
+                
+                // 使用TreasureMap类穿越沙漠（传入方向信息）
+                const direction = '向东南方';
+                const result = await TreasureMap.traverseDesert(direction);
+                
+                // 清除进度更新
+                clearInterval(interval);
+                
+                // 设置完成进度
+                progressBar.style.width = '100%';
+                progressText.textContent = '穿越进度: 100%';
+                
+                // 停止走路动画
+                explorer.classList.remove('walking');
+                
+                // 更新线索文本
+                clueText.textContent = result;
+                
+                // 更新游戏状态 - 穿越沙漠
+                gameState.hasCrossedDesert = true;
+                gameState.save();
+                // 显示成功消息
+                setTimeout(() => showToast('你成功穿越了沙漠！神庙就在前方。'), 800);
+            } catch (error) {
+                console.error('穿越沙漠失败:', error);
+                clueText.textContent = error;
+                
+                // 停止走路动画
+                explorer.classList.remove('walking');
+            }
+        }
+        
+        // 事件监听器
+        startButton.addEventListener('click', startDesertTraversal);
+        
+        returnButton.addEventListener('click', () => {
+            gameState.save();
+            window.location.href = 'index.html';
+        });
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', () => {
+            // 检查是否有方向
+            checkDirection();
+            
+            // 如果已经穿越了沙漠，更新显示
+            if (gameState.hasCrossedDesert) {
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '100%';
+                progressText.textContent = '穿越进度: 100%';
+                explorer.style.left = '80%';
+                clueText.textContent = '你成功穿越了沙漠，神庙就在前方！';
+                startButton.disabled = true;
+                startButton.textContent = '已完成穿越';
+            }
+            
+            // 初始化页面通用交互
+            gameState.setupNavigation();
+            // 播放背景音乐
+            gameState.playBackgroundMusic('desert-road');
+        });
+    </script>
+</body>
+</html>

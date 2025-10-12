@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沙漠寻宝冒险</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: '微软雅黑', Arial, sans-serif;
+            overflow: hidden;
+            background-color: #000;
+        }
+        
+        /* 主容器 */
+        .panorama-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('images/background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+        
+        /* 背景装饰 */
+        .background-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        /* 云朵动画 */
+        .cloud {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+            filter: blur(10px);
+            animation: floatCloud 30s linear infinite;
+        }
+        
+        .cloud:nth-child(4) {
+            width: 100px;
+            height: 40px;
+            top: 10%;
+            left: -100px;
+            animation-duration: 60s;
+        }
+        
+        .cloud:nth-child(5) {
+            width: 80px;
+            height: 30px;
+            top: 20%;
+            left: -80px;
+            animation-duration: 45s;
+            animation-delay: 10s;
+        }
+        
+        .cloud:nth-child(6) {
+            width: 120px;
+            height: 50px;
+            top: 15%;
+            left: -120px;
+            animation-duration: 70s;
+            animation-delay: 5s;
+        }
+        
+        @keyframes floatCloud {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(150vw); }
+        }
+        
+        /* 标题样式 */
+        .title {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 48px;
+            color: #8B4513;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+            z-index: 10;
+            text-align: center;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            0% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
+            100% { text-shadow: 2px 2px 15px rgba(255, 215, 0, 0.8); }
+        }
+        
+        /* 标记点通用样式 */
+        .marker {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 5;
+            animation: pulseMarker 2s infinite;
+        }
+        
+        .marker:hover {
+            transform: scale(1.1);
+        }
+        
+        @keyframes pulseMarker {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 图标样式 */
+        .marker-icon {
+            width: 100px;
+            height: 150px;
+            border-radius: 8px;
+            background-color: #C8A56B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .marker-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .marker:hover .marker-icon {
+            box-shadow: 0 0 25px rgba(255, 215, 0, 1);
+        }
+        
+        /* 文字标签样式 */
+        .marker-label {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #8B4513;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .marker:hover .marker-label {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        /* 游戏提示 */
+        .game-hint {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 25px;
+            border-radius: 30px;
+            color: #8B4513;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            text-align: center;
+        }
+        
+        @keyframes pulse {
+            0% { transform: translate(-50%, 0); opacity: 1; }
+            50% { transform: translate(-50%, -10px); opacity: 0.8; }
+            100% { transform: translate(-50%, 0); opacity: 1; }
+        }
+        
+        /* 游戏状态显示 */
+        .status-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(139, 69, 19, 0.7);
+            border-radius: 15px;
+            padding: 15px 20px;
+            color: #F9F5F0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 16px;
+            gap: 10px;
+        }
+        
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .status-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #C8A56B;
+            font-size: 16px;
+        }
+        
+        /* 重新开始游戏按钮 */
+        .restart-button {
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .restart-button:hover {
+            background-color: #FF4500;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .restart-button:active {
+            transform: translateY(0);
+        }
+        
+        /* 媒体查询，适应移动设备 */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 32px;
+                top: 30px;
+            }
+            
+            .marker-icon {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .status-icon {
+                width: 16px;
+                height: 16px;
+                font-size: 14px;
+            }
+            
+            .status-item {
+                font-size: 14px;
+                gap: 8px;
+            }
+            
+            .marker-label {
+                font-size: 14px;
+                padding: 5px 10px;
+            }
+            
+            .game-hint {
+                font-size: 16px;
+                padding: 10px 20px;
+                bottom: 30px;
+            }
+            
+            .game-status {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 10px;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="panorama-container">
+        <!-- 背景装饰 -->
+        <div class="background-decoration">
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+        </div>
+        
+        <!-- 标题 -->
+        <div class="title">沙漠寻宝冒险</div>
+        
+        <!-- 游戏状态面板 -->
+        <div class="status-panel">
+            <div class="status-item">
+                <span class="status-icon">📍</span>
+                <span>已探索地点: <span id="visitedCount">0</span></span>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">🗺️</span>
+                <span>古地图: <span id="hasMap">未获取</span></span>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">🧭</span>
+                <span>方向: <span id="hasDirection">未获取</span></span>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">🏜️</span>
+                <span>沙漠: <span id="hasCrossed">未穿越</span></span>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">💎</span>
+                <span>宝藏: <span id="hasTreasure">未找到</span></span>
+            </div>
+            <button id="restart-game" class="restart-button">重新开始游戏</button>
+        </div>
+        
+        <!-- 地点标记 -->
+        <div class="marker" data-location="library" style="top: 30%; left: 20%;">
+            <div class="marker-icon">
+                <img src="images/library.jpg" alt="古老图书馆">
+            </div>
+            <div class="marker-label">古老图书馆</div>
+        </div>
+        
+        <div class="marker" data-location="signpost" style="top: 45%; left: 40%;">
+            <div class="marker-icon">
+                <img src="images/signpost.jpg" alt="神秘路标">
+            </div>
+            <div class="marker-label">神秘路标</div>
+        </div>
+        
+        <div class="marker" data-location="desert-road" style="top: 55%; left: 60%;">
+            <div class="marker-icon">
+                <img src="images/desert-road.jpg" alt="沙漠之路">
+            </div>
+            <div class="marker-label">沙漠之路</div>
+        </div>
+        
+        <div class="marker" data-location="temple" style="top: 35%; left: 75%;">
+            <div class="marker-icon">
+                <img src="images/temple.jpg" alt="古老神庙">
+            </div>
+            <div class="marker-label">古老神庙</div>
+        </div>
+    </div>
+    
+    <script src="treasurePRO.js"></script>
+    <script>
+    // 初始化游戏状态
+    const gameState = new GameState();
+    gameState.load();
+    window.gameState = gameState;
+        
+        // 更新游戏状态显示
+        function updateGameStatus() {
+            document.getElementById('visitedCount').textContent = gameState.visitedLocations.length;
+            document.getElementById('hasMap').textContent = gameState.hasAncientMap ? '已获取' : '未获取';
+            document.getElementById('hasDirection').textContent = gameState.hasDirection ? '已获取' : '未获取';
+            document.getElementById('hasCrossed').textContent = gameState.hasCrossedDesert ? '已穿越' : '未穿越';
+            document.getElementById('hasTreasure').textContent = gameState.hasFoundTreasure ? '已找到' : '未找到';
+        }
+        
+        // 显示游戏开始提示
+        function showGameStartHint() {
+            const hint = document.createElement('div');
+            hint.className = 'game-hint';
+            hint.textContent = '点击图片开始你的寻宝之旅！';
+            hint.style.animation = 'pulse 2s infinite';
+            
+            document.querySelector('.panorama-container').appendChild(hint);
+            
+            // 3秒后自动消失
+            setTimeout(() => {
+                hint.style.transition = 'opacity 0.5s, transform 0.5s';
+                hint.style.opacity = '0';
+                hint.style.transform = 'translateX(-50%) translateY(20px)';
+                setTimeout(() => hint.remove(), 500);
+            }, 3000);
+        }
+        
+        // 设置标记点点击事件
+        function setupMarkers() {
+            document.querySelectorAll('.marker').forEach(marker => {
+                marker.addEventListener('click', () => {
+                    const location = marker.getAttribute('data-location');
+                    const scene = `${location}.html`;
+                    navigateToScene(scene);
+                });
+            });
+        }
+        
+        // 初始化重新开始游戏按钮
+        function setupRestartButton() {
+            const restartButton = document.getElementById('restart-game');
+            if (restartButton) {
+                restartButton.addEventListener('click', () => {
+                    showModal('确定要重新开始游戏吗？当前进度将会丢失！', '确认', () => {
+                        gameState.reset();
+                        window.location.href = 'index.html';
+                    });
+                });
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', () => {
+            updateGameStatus();
+            setupMarkers();
+            showGameStartHint();
+            setupRestartButton();
+            
+            // 初始化页面通用交互（返回按钮等）
+            gameState.setupNavigation();
+            
+            // 尝试播放背景音乐
+            gameState.playBackgroundMusic('index');
+        });
+    </script>
+</body>
+</html>
